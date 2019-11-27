@@ -18,6 +18,8 @@ public class Game : MonoBehaviour
     SimpleBrain brain;
 
     //public float[] output;
+
+    Neuron neuron;
     void Start()
     {
         brain = new SimpleBrain(layers);
@@ -33,6 +35,15 @@ public class Game : MonoBehaviour
         float t = .5f;
         Debug.Log(NFunctions.Sigmoid(t));
         Debug.Log(NFunctions.InvSigmoid(NFunctions.Sigmoid(t)));
+
+
+        neuron = new Neuron();
+        Debug.Log("predict " + neuron.Predict(1));
+        Debug.Log("Cost " + neuron.Train(1, 0));
+
+        Debug.Log("--------------------------");
+        Debug.Log("predict " + neuron.Predict(1));
+        Debug.Log("Cost " + neuron.Train(1, 0));
         //brain.Train(input, output);
     }
 
@@ -45,6 +56,26 @@ public class Game : MonoBehaviour
             point.position = pos;
 
             points.Add(point);
+        }
+
+        if (Input.GetKey(KeyCode.Space)) {
+            Debug.Log("--------------------------");
+            var x = Random.value;
+            Debug.Log(x + " - predict " + neuron.Predict(x));
+            Debug.Log("Error : " + (1 - x - neuron.Predict(x)));
+        }
+        if (Input.GetKey(KeyCode.S)) {
+            Debug.Log("--------------------------");
+            var x = Random.value;
+            Debug.Log(1 + " - predict " + neuron.Predict(1));
+            Debug.Log("Cost " + neuron.Train(1, 0));
+        }
+
+        if (Input.GetKey(KeyCode.W)) {
+            Debug.Log("--------------------------");
+            var x = Random.value;
+            Debug.Log(x + " - predict " + neuron.Predict(x));
+            Debug.Log("Cost " + neuron.Train(x, 1 - x));
         }
 
         DrawGraph();

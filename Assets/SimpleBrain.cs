@@ -5,6 +5,7 @@ using UnityEngine;
 public class SimpleBrain {
     private int[] layers;
     private float[][] neurons;
+    private float[][] zneurons;
     private float[][] biases;
     private float[][][] weights;
 
@@ -78,6 +79,7 @@ public class SimpleBrain {
                     neurons[i + 1][j] += neurons[i][k] * weights[i][j][k];
                 }
             }
+            System.Array.Copy(neurons[i + 1], zneurons[i + 1], layers[i + 1]);
             if (i + 1 < layers.Length - 1) {
                 NFunctions.UseFunction(neurons[i + 1], NFunctions.Tanh);
                 continue;
@@ -94,14 +96,17 @@ public class SimpleBrain {
             log += Mathf.Pow(predictions[i] - outputs[i], 2) + " | " + (predictions[i] - outputs[i]) + " ";
         }
         log += " ]";
-        Debug.Log(log);
+        //Debug.Log(log);
     }
 
     public void InitNeurons() {
         neurons = new float[layers.Length][];
+        zneurons = new float[layers.Length][];
         for (int i = 0; i < layers.Length; i++) {
             float[] nlayer = new float[layers[i]];
             neurons[i] = nlayer;
+            nlayer = new float[layers[i]];
+            zneurons[i] = nlayer;
         }
     }
 
