@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Neuron 
 {
+    int iterations = 0;
     public Neuron() {
         weight = Random.value * 2 - 1;
         bias = Random.value * 2 - 1;
@@ -29,7 +30,7 @@ public class Neuron
 
         float zw = x; // the input for n;
         float az = NFunctions.divSigmoid(p, true); // derivitive of F(n) => F'(n)
-        float ca = 2 * (p - y); // desiried output;
+        float ca = 2 * (y - p); // desiried output;
 
         float wc = zw * ca * az; // input * F'(n) * error = "Slope" for minimizing the Cost(Error)!
         float bc = ca * az;  // input(1) * F'(n) * error
@@ -42,13 +43,13 @@ public class Neuron
 
 
         Debug.Log("bias : " + bias + " | weight : " + weight );
-        Debug.Log("error : " + error + " | wc : " + wc + ", bc : " + bc);
+        Debug.Log("error : " + error + " | wc : " + wc + ", bc : " + bc  + " iteration : " + iterations);
 
-        weight -= wc * .1f;
-        bias -= bc * .1f;
+        weight += wc;
+        bias += bc;
 
 
-
+        iterations++;
         return Mathf.Pow((p - y), 2);
     }
 }
