@@ -11,36 +11,44 @@ public class Neuron
 
     public float weight;
     public float bias;
+    public float neuron;
 
     public float Predict(float x) {
-        return weight * x + bias;
+        neuron = weight * x + bias;
+        return NFunctions.Sigmoid(neuron);
     }
 
     public float Train(float x, float y) {
-        var zl = Predict(x);
-        var cost = (zl - y);
+        var p = Predict(x);
+        var cost = (p - y);
         cost *= cost;
-        var error = y - zl;
+        var error = y - p;
 
         float ws = weight * x;
         float bs = (bias);
 
-        float zw = x;
-        float az = 1;
-        float ca = 2 * (zl - y);
+        float zw = x; // the input for n;
+        float az = NFunctions.divSigmoid(p, true); // derivitive of F(n) => F'(n)
+        float ca = 2 * (p - y); // desiried output;
+
+        float wc = zw * ca * az; // input * F'(n) * error = "Slope" for minimizing the Cost(Error)!
+        float bc = ca * az;  // input(1) * F'(n) * error
+
+        wc = Mathf.Clamp(wc, -1, 1);
+        bc = Mathf.Clamp(bc, -1, 1);
 
         //ws /= avg;
         //bs /= avg;
 
 
         Debug.Log("bias : " + bias + " | weight : " + weight );
-        Debug.Log("error : " + error);
+        Debug.Log("error : " + error + " | wc : " + wc + ", bc : " + bc);
 
-        weight -= zw * ca * az * .001f;
-        bias -= ca * az * .001f;
+        weight -= wc * .1f;
+        bias -= bc * .1f;
 
 
 
-        return Mathf.Pow((zl - y), 2);
+        return Mathf.Pow((p - y), 2);
     }
 }

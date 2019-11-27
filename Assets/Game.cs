@@ -62,7 +62,6 @@ public class Game : MonoBehaviour
             Debug.Log("--------------------------");
             var x = Random.value;
             Debug.Log(x + " - predict " + neuron.Predict(x));
-            Debug.Log("Error : " + (1 - x - neuron.Predict(x)));
         }
         if (Input.GetKey(KeyCode.S)) {
             Debug.Log("--------------------------");
@@ -75,7 +74,7 @@ public class Game : MonoBehaviour
             Debug.Log("--------------------------");
             var x = Random.value;
             Debug.Log(x + " - predict " + neuron.Predict(x));
-            Debug.Log("Cost " + neuron.Train(x, 1 - x));
+            Debug.Log("Cost " + neuron.Train(x, x > .5f ? 0 : 1));
         }
 
         DrawGraph();

@@ -13,6 +13,14 @@ public static class NFunctions
         return -1 / Mathf.Log((float)Math.E, 1 / y - 1);
     }
 
+    public static float divSigmoid(float x, bool sigmoid = false) {
+        return sigmoid ? x * (1 - x) : divSigmoid(Sigmoid(x), true);
+    }
+
+    public static float Relu(float x) {
+        return x > 0 ? x : 0;
+    }
+
     public static float Linear(float x) {
         return x;
     }
