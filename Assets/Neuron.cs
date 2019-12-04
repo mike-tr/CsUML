@@ -19,17 +19,17 @@ public class Neuron
         return NFunctions.Sigmoid(neuron);
     }
 
+    float dw = 0;
+    float db = 0;
+    float cost = 0;
     public float Train(float x, float y) {
         var p = Predict(x);
         var cost = (p - y);
         cost *= cost;
         var error = y - p;
 
-        float ws = weight * x;
-        float bs = (bias);
-
         float zw = x; // the input for n;
-        float az = NFunctions.divSigmoid(p, true); // derivitive of F(n) => F'(n)
+        float az = NFunctions.DerivativeActivation(Activation.Sigmoid, p, true); // derivitive of F(n) => F'(n)
         float ca = 2 * (y - p); // desiried output;
 
         float wc = zw * ca * az; // input * F'(n) * error = "Slope" for minimizing the Cost(Error)!
@@ -42,13 +42,21 @@ public class Neuron
         //bs /= avg;
 
 
-        Debug.Log("bias : " + bias + " | weight : " + weight );
-        Debug.Log("error : " + error + " | wc : " + wc + ", bc : " + bc  + " iteration : " + iterations);
+        //Debug.Log("bias : " + bias + " | weight : " + weight );
+        //Debug.Log("error : " + error + " | wc : " + wc + ", bc : " + bc  + " iteration : " + iterations);
 
-        weight += wc;
-        bias += bc;
+        dw += wc;
+        db += bc;
+        this.cost += cost;
 
-
+        if(iterations % 10 == 0) {
+            weight += dw * .05f;
+            bias += db * .05f;
+            db = 0;
+            dw = 0;
+            Debug.Log("Averate cost per 10 iterations - " + this.cost * 0.1f);
+            this.cost = 0;
+        }
         iterations++;
         return Mathf.Pow((p - y), 2);
     }

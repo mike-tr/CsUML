@@ -2,6 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
+public enum Activation {
+    Sigmoid,
+    Linear,
+    Relu,
+    Tanh,
+}
 public class SimpleBrain {
     private int[] layers;
     private float[][] neurons;
@@ -9,12 +16,15 @@ public class SimpleBrain {
     private float[][] biases;
     private float[][][] weights;
 
-    public SimpleBrain(int[] layers) {
+    private Activation[] activations;
+
+    public SimpleBrain(int[] layers, Activation[] activations) {
         this.layers = new int[layers.Length];
         for (int i = 0; i < layers.Length; i++) {
             this.layers[i] = layers[i];
         }
 
+        this.activations = activations;
         InitNeurons();
         InitBiases();
         InitWeights();
@@ -81,19 +91,40 @@ public class SimpleBrain {
             }
             System.Array.Copy(neurons[i + 1], zneurons[i + 1], layers[i + 1]);
             if (i + 1 < layers.Length - 1) {
-                NFunctions.UseFunction(neurons[i + 1], NFunctions.Tanh);
+                NFunctions.UseFunction(neurons[i + 1], activations[i + 1]);
                 continue;
             }
-            NFunctions.UseFunction(neurons[i + 1], NFunctions.Sigmoid);
+            NFunctions.UseFunction(neurons[i + 1], activations[i + 1]);
         }
         return neurons[layers.Length - 1];
     }
 
     public void Train(float[] inputs, float[] outputs) {
         float[] predictions = Predict(inputs);
+        float[] costs = new float[predictions.Length];
         string log = "Error - [";
         for (int i = 0; i < outputs.Length; i++) {
-            log += Mathf.Pow(predictions[i] - outputs[i], 2) + " | " + (predictions[i] - outputs[i]) + " ";
+            costs[i] = Mathf.Pow(predictions[i] - outputs[i], 2);
+            var error = 2 * (outputs[i] - predictions[i]);
+            bool inner = false;
+            for (int inpLayer = layers.Length - 2; inpLayer >= 0; inpLayer--) {
+
+                if (!inner) {
+
+                }
+                //inpLayer = input layer!
+                // i = the y neuron
+                // n = the x neuron
+                var oLayer = inpLayer + 1;
+                Debug.Log(inpLayer);
+                for (int inpNeuron = 0; inpNeuron < layers[inpLayer]; inpNeuron++) {
+                    Debug.Log(weights[inpLayer][i][inpNeuron] + " w : " + inpNeuron + " ,x : " + neurons[inpLayer][inpNeuron]);
+                }
+                
+            }
+
+            Debug.Log(neurons[layers.Length - 1][i] + " n " + i);
+
         }
         log += " ]";
         //Debug.Log(log);

@@ -22,14 +22,22 @@ public class Game : MonoBehaviour
     Neuron neuron;
     void Start()
     {
-        brain = new SimpleBrain(layers);
+        Activation[] activations = new Activation[layers.Length];
+        for (int i = 0; i < activations.Length; i++) {
+            if (i == activations.Length - 1) {
+                activations[i] = Activation.Sigmoid;
+            } else {
+                activations[i] = Activation.Tanh;
+            }
+        }
+        brain = new SimpleBrain(layers, activations);
         brain.PrintBiases();
         brain.Predict(input);
         brain.PrintNeurons();
 
         cam = Camera.main;
 
-        Debug.Log(cam.ViewportToWorldPoint(new Vector2(.1f, .5f)));
+        //Debug.Log(cam.ViewportToWorldPoint(new Vector2(.1f, .5f)));
 
 
         float t = .5f;
@@ -44,6 +52,8 @@ public class Game : MonoBehaviour
         Debug.Log("--------------------------");
         Debug.Log("predict " + neuron.Predict(1));
         Debug.Log("Cost " + neuron.Train(1, 0));
+
+        brain.Train(input, new float[]{ 0.5f, .5f});
         //brain.Train(input, output);
     }
 
@@ -71,13 +81,11 @@ public class Game : MonoBehaviour
         }
 
         if (Input.GetKey(KeyCode.W)) {
-            Debug.Log("--------------------------");
             var x = Random.value;
-            Debug.Log(x + " - predict " + neuron.Predict(x));
-            Debug.Log("Cost " + neuron.Train(x, x > .5f ? 0 : 1));
+            neuron.Train(x, x > .5f ? 0 : 1);
         }
 
-        DrawGraph();
+        //DrawGraph();
 
         Train();
     }
