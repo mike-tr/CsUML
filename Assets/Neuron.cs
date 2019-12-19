@@ -32,8 +32,8 @@ public class Neuron
         float az = NFunctions.DerivativeActivation(Activation.Sigmoid, p, true); // derivitive of F(n) => F'(n)
         float ca = 2 * (y - p); // desiried output;
 
-        float wc = zw * ca * az; // input * F'(n) * error = "Slope" for minimizing the Cost(Error)!
-        float bc = ca * az;  // input(1) * F'(n) * error
+        float wc = zw * ca * az; // input * Wf'(n) * error = "Slope" for minimizing the Cost(Error)!
+        float bc = ca * az;  // input(1) * Bf'(n) * error
 
         wc = Mathf.Clamp(wc, -1, 1);
         bc = Mathf.Clamp(bc, -1, 1);

@@ -24,11 +24,7 @@ public class Game : MonoBehaviour
     {
         Activation[] activations = new Activation[layers.Length];
         for (int i = 0; i < activations.Length; i++) {
-            if (i == activations.Length - 1) {
-                activations[i] = Activation.Sigmoid;
-            } else {
-                activations[i] = Activation.Tanh;
-            }
+            activations[i] = i == activations.Length - 1 ? Activation.Sigmoid : Activation.Tanh;
         }
         brain = new SimpleBrain(layers, activations);
         brain.PrintBiases();
@@ -40,20 +36,16 @@ public class Game : MonoBehaviour
         //Debug.Log(cam.ViewportToWorldPoint(new Vector2(.1f, .5f)));
 
 
-        float t = .5f;
-        Debug.Log(NFunctions.Sigmoid(t));
-        Debug.Log(NFunctions.InvSigmoid(NFunctions.Sigmoid(t)));
-
-
         neuron = new Neuron();
-        Debug.Log("predict " + neuron.Predict(1));
-        Debug.Log("Cost " + neuron.Train(1, 0));
+        //Debug.Log("predict " + neuron.Predict(1));
+        //Debug.Log("Cost " + neuron.Train(1, 0));
 
-        Debug.Log("--------------------------");
-        Debug.Log("predict " + neuron.Predict(1));
-        Debug.Log("Cost " + neuron.Train(1, 0));
+        //Debug.Log("--------------------------");
+        //Debug.Log("predict " + neuron.Predict(1));
+        //Debug.Log("Cost " + neuron.Train(1, 0));
 
         brain.Train(input, new float[]{ 0.5f, .5f});
+        brain.PrintNeurons();
         //brain.Train(input, output);
     }
 
@@ -65,19 +57,21 @@ public class Game : MonoBehaviour
             Vector2 pos = cam.ScreenToWorldPoint(Input.mousePosition);
             point.position = pos;
 
+            Debug.Log("???" + pos);
+
             points.Add(point);
         }
 
-        if (Input.GetKey(KeyCode.Space)) {
+        if (Input.GetKeyDown(KeyCode.Space)) {
             Debug.Log("--------------------------");
-            var x = Random.value;
-            Debug.Log(x + " - predict " + neuron.Predict(x));
+            brain.Train(new float[] { 0.5f, 0.5f }, new float[] { .5f, .5f });
+            //var x = Random.value;
+            //Debug.Log(x + " - predict " + neuron.Predict(x));
         }
         if (Input.GetKey(KeyCode.S)) {
             Debug.Log("--------------------------");
             var x = Random.value;
-            Debug.Log(1 + " - predict " + neuron.Predict(1));
-            Debug.Log("Cost " + neuron.Train(1, 0));
+            brain.Train(new float[] { x, 1 - x }, new float[] { 1 - x, x });
         }
 
         if (Input.GetKey(KeyCode.W)) {
@@ -87,7 +81,7 @@ public class Game : MonoBehaviour
 
         //DrawGraph();
 
-        Train();
+        //Train();
     }
 
     const int size = 10;

@@ -3,6 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
+public enum Activation {
+    Sigmoid,
+    Linear,
+    Relu,
+    Tanh,
+}
+
 public static class NFunctions 
 {
     public static float Sigmoid(float x) {
