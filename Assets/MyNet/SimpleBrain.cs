@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public partial class SimpleBrain {
-  
+    public void ApplyTraining() {
+        trainingSum.Apply(biases, weights);
+    }
+
     public float[] Predict(float[] inputs) {
         if(inputs.Length < layers[0]) {
             Debug.LogError("Expects " + layers[0] + " inputs, got only " + inputs.Length);
@@ -40,48 +43,52 @@ public partial class SimpleBrain {
         string plog = "Prediction - [ ";
         string ilog = "Inputs - [ ";
         string dlog = "desirable - [";
-        for (int i = 0; i < outputs.Length; i++) {
+        for (int i = 0; i < predictions.Length; i++) {
             costs[i] = Mathf.Pow(predictions[i] - outputs[i], 2);
             var error = 2 * (outputs[i] - predictions[i]);
-            log += error + ", ";
-            plog += predictions[i] + ", ";
-            ilog += inputs[i] + ", ";
-            dlog += outputs[i] + ", ";
+            if (logging) {
+                log += error + ", ";
+                plog += predictions[i] + ", ";
+                ilog += inputs[i] + ", ";
+                dlog += outputs[i] + ", ";
+            }
 
             bool inner = false;
             for (int inpLayer = layers.Length - 2; inpLayer >= 0; inpLayer--) {
 
                 if (!inner) {               
-                    Debug.Log(inpLayer + " - output layers! - " + activations[inpLayer]);
                     //  where activation on output layer, and output neuron
                     float az = NFunctions.DerivativeActivation(activations[inpLayer + 1], zneurons[inpLayer + 1][i], false);
                     float bc = error * az;  // input(1) * Bf'(n) * error
-                    biases[inpLayer + 1][i] += bc;
+                    //biases[inpLayer + 1][i] += bc;
+                    trainingSum.AddChange(inpLayer + 1, i, bc);
 
                     for (int inpNeuron = 0; inpNeuron < layers[inpLayer]; inpNeuron++) {
                         //Debug.Log(weights[inpLayer][i][inpNeuron] + " w : " + inpNeuron + " ,x : " + neurons[inpLayer][inpNeuron]);
                         float zw = zneurons[inpLayer][inpNeuron]; // the input for n;                                                          
                         float wc = zw * error * az; // input * Wf'(n) * error = "Slope" for minimizing the Cost(Error)!
 
-                        weights[inpLayer][i][inpNeuron] += wc;
+                        //weights[inpLayer][i][inpNeuron] += wc;
+                        trainingSum.AddChange(inpLayer, i, inpNeuron, wc);
                         //trainingSum.Save(inpLayer, i, inpNeuron, wc, bc);
                     }
                     inner = true;
                 } else {
-                    Debug.Log(inpLayer + " - Inner layers! - " + activations[inpLayer]);
                     var oLayer = inpLayer + 1;
                     for (int outNeuron = 0; outNeuron < layers[oLayer]; outNeuron++) {
                         //  where activation on output layer, and output neuron
                         float az = NFunctions.DerivativeActivation(activations[oLayer], zneurons[oLayer][outNeuron], false);
                         float bc = error * az;  // input(1) * Bf'(n) * error
-                        biases[oLayer][outNeuron] += bc;
+                        trainingSum.AddChange(oLayer, outNeuron, bc);
+                        //biases[oLayer][outNeuron] += bc;
 
                         for (int inpNeuron = 0; inpNeuron < layers[inpLayer]; inpNeuron++) {
                             //Debug.Log(weights[inpLayer][outNeuron][inpNeuron] + " w : " + inpNeuron + " ,x : " + neurons[inpLayer][inpNeuron]);
 
                             float zw = zneurons[inpLayer][inpNeuron]; // the input for n;                                         
                             float wc = zw * error * az; // input * Wf'(n) * error = "Slope" for minimizing the Cost(Error)!                         
-                            weights[inpLayer][outNeuron][inpNeuron] += wc;                         
+                            //weights[inpLayer][outNeuron][inpNeuron] += wc;
+                            trainingSum.AddChange(inpLayer, outNeuron, inpNeuron, wc);
                         }
                     }
                 }
@@ -99,7 +106,15 @@ public partial class SimpleBrain {
         plog += " ]";
         dlog += " ]";
         ilog += " ]";
-        Debug.Log(log + " , " + plog);
-        Debug.Log(ilog + " , " + dlog);
+        if (logging) {
+            Debug.Log(log + " , " + plog);
+            Debug.Log(ilog + " , " + dlog);
+        }
+
+
+        if(trainingSum.Epocs()) {
+            trainingSum.Apply(biases, weights);
+            Debug.Log("Epoc Ended applying changes!");
+        }
     }
 }

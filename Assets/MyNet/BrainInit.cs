@@ -15,18 +15,21 @@ public partial class SimpleBrain {
 
     TrainingSet trainingSum;
 
-    public SimpleBrain(int[] layers, Activation[] activations) {
+    bool logging = false;
+
+    public SimpleBrain(int[] layers, Activation[] activations, bool log) {
         this.layers = new int[layers.Length];
         for (int i = 0; i < layers.Length; i++) {
             this.layers[i] = layers[i];
         }
 
+        this.logging = log;
         this.activations = activations;
         InitNeurons();
         InitBiases();
         InitWeights();
 
-        trainingSum = new TrainingSet(layers, .1f);
+        trainingSum = new TrainingSet(layers, .05f, 200);
     }
 
     public void InitNeurons() {
@@ -94,7 +97,6 @@ public partial class SimpleBrain {
 
     public void PrintWeights() {
         string log = "{";
-        Debug.Log(weights);
         foreach (float[][] f in weights) {
             log += "[";
             foreach (float[] r in f) {
