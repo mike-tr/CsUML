@@ -4,7 +4,7 @@ using UnityEngine;
 
 public partial class SimpleBrain {
     public void ApplyTraining() {
-        trainingSum.Apply(biases, weights);
+        trainingAvg.Apply(biases, weights);
     }
 
     public float[] Predict(float[] inputs) {
@@ -33,19 +33,77 @@ public partial class SimpleBrain {
         return neurons[layers.Length - 1];
     }
 
-    public void Train(float[] inputs, float[] outputs) {
+    public float Train(float[] inputs, float[] outputs) {
+        //get the neual net predictions
+        float[] predictions = Predict(inputs);
+        if (predictions == null) {
+            return -1;
+        }
+        //create a cost derivitive vector
+        float[][] dcost = new float[layers.Length][];
+        for (int i = 0; i < layers.Length; i++) {
+            dcost[i] = new float[layers[i]];
+        }
+
+        float cost = 0;
+        for (int i = 0; i < predictions.Length; i++) {
+            //calculate the db_cost for each output neuron and store it.
+            var c = (outputs[i] - predictions[i]);
+            dcost[layers.Length - 1][i] = 2 * c;
+            cost += c*c;
+        }
+
+        //Calculate the nudge needed for each bias/weight in respect to the cost.
+        for (int inputLayer = layers.Length - 2; inputLayer >= 0; inputLayer--) {      
+            for (int outn = 0; outn < layers[inputLayer + 1]; outn++) {
+                int outputLayer = inputLayer + 1;
+                // we need to calculate d(C/B),
+                // d(C/B) = d(Z/B) * d(A/Z) * d(C/A) , d(Z/B) = 1
+                float dCA = dcost[outputLayer][outn];
+                float dAZ = NFunctions.DerivativeActivation(activations[outputLayer], zneurons[outputLayer][outn], false);
+
+                float bchange = dCA * dAZ;
+                //biases[outputLayer][outn] += bchange * .1f;
+                trainingAvg.AddChange(outputLayer, outn, bchange);
+
+                for (int inpn = 0; inpn < layers[inputLayer]; inpn++) {
+                    //we need to calculate in here the d(C/W),
+                    // WC = d(Z/W)*d(A/Z)*d(C/A)
+                    float dWC = neurons[inputLayer][inpn];
+                    trainingAvg.AddChange(inputLayer, outn, inpn, dWC * bchange);
+
+                    //weights[inputLayer][outn][inpn] += bchange * dWC * .1f;
+                    dcost[inputLayer][inpn] += weights[inputLayer][outn][inpn] * bchange;           
+                }
+            }
+        }
+
+        if (trainingAvg.Epocs()) {
+            trainingAvg.Apply(biases, weights);
+        }
+        return cost;
+    }
+
+    public void TrainTEST(float[] inputs, float[] outputs) {
         float[] predictions = Predict(inputs);
         if(predictions == null) {
             return;
         }
-        float[] costs = new float[predictions.Length];
+        
         string log = "Error - [ ";
         string plog = "Prediction - [ ";
         string ilog = "Inputs - [ ";
         string dlog = "desirable - [";
         for (int i = 0; i < predictions.Length; i++) {
-            costs[i] = Mathf.Pow(predictions[i] - outputs[i], 2);
+            //costs[i] = Mathf.Pow(predictions[i] - outputs[i], 2);
             var error = 2 * (outputs[i] - predictions[i]);
+
+            //error *= Mathf.Abs(error);
+            //error = Mathf.Clamp(error, -.1f, .1f);
+            
+            
+            Debug.Log(error + " ," + trainingAvg.GetMeanError(error));
+            error = trainingAvg.GetMeanError(error);
             if (logging) {
                 log += error + ", ";
                 plog += predictions[i] + ", ";
@@ -61,7 +119,7 @@ public partial class SimpleBrain {
                     float az = NFunctions.DerivativeActivation(activations[inpLayer + 1], zneurons[inpLayer + 1][i], false);
                     float bc = error * az;  // input(1) * Bf'(n) * error
                     //biases[inpLayer + 1][i] += bc;
-                    trainingSum.AddChange(inpLayer + 1, i, bc);
+                    trainingAvg.AddChange(inpLayer + 1, i, bc);
 
                     for (int inpNeuron = 0; inpNeuron < layers[inpLayer]; inpNeuron++) {
                         //Debug.Log(weights[inpLayer][i][inpNeuron] + " w : " + inpNeuron + " ,x : " + neurons[inpLayer][inpNeuron]);
@@ -69,7 +127,7 @@ public partial class SimpleBrain {
                         float wc = zw * error * az; // input * Wf'(n) * error = "Slope" for minimizing the Cost(Error)!
 
                         //weights[inpLayer][i][inpNeuron] += wc;
-                        trainingSum.AddChange(inpLayer, i, inpNeuron, wc);
+                        trainingAvg.AddChange(inpLayer, i, inpNeuron, wc);
                         //trainingSum.Save(inpLayer, i, inpNeuron, wc, bc);
                     }
                     inner = true;
@@ -79,7 +137,8 @@ public partial class SimpleBrain {
                         //  where activation on output layer, and output neuron
                         float az = NFunctions.DerivativeActivation(activations[oLayer], zneurons[oLayer][outNeuron], false);
                         float bc = error * az;  // input(1) * Bf'(n) * error
-                        trainingSum.AddChange(oLayer, outNeuron, bc);
+                        trainingAvg.AddChange(oLayer, outNeuron, bc * .01f);
+                        
                         //biases[oLayer][outNeuron] += bc;
 
                         for (int inpNeuron = 0; inpNeuron < layers[inpLayer]; inpNeuron++) {
@@ -88,7 +147,7 @@ public partial class SimpleBrain {
                             float zw = zneurons[inpLayer][inpNeuron]; // the input for n;                                         
                             float wc = zw * error * az; // input * Wf'(n) * error = "Slope" for minimizing the Cost(Error)!                         
                             //weights[inpLayer][outNeuron][inpNeuron] += wc;
-                            trainingSum.AddChange(inpLayer, outNeuron, inpNeuron, wc);
+                            trainingAvg.AddChange(inpLayer, outNeuron, inpNeuron, wc * 0.01f);
                         }
                     }
                 }
@@ -112,8 +171,8 @@ public partial class SimpleBrain {
         }
 
 
-        if(trainingSum.Epocs()) {
-            trainingSum.Apply(biases, weights);
+        if(trainingAvg.Epocs()) {
+            trainingAvg.Apply(biases, weights);
             Debug.Log("Epoc Ended applying changes!");
         }
     }

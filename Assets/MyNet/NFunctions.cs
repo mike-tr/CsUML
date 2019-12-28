@@ -65,7 +65,7 @@ public static class NFunctions
         return Linear;
     }
 
-    public static float DerivativeActivation(Activation activation, float x, bool IsY) {
+    public static float DerivativeActivation(Activation activation, float x, bool IsY = false) {
         switch (activation) {
             case Activation.Tanh:
                 return IsY ? 1 - Mathf.Pow(x, 2) : 1 - Mathf.Pow(Tanh(x), 2);

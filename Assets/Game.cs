@@ -26,7 +26,7 @@ public class Game : MonoBehaviour
         for (int i = 0; i < activations.Length; i++) {
             activations[i] = i == activations.Length - 1 ? Activation.Sigmoid : Activation.Tanh;
         }
-        brain = new SimpleBrain(layers, activations, true);
+        brain = new SimpleBrain(layers, activations, 0.05f, 100, true);
         brain.PrintBiases();
         brain.Predict(input);
         brain.PrintNeurons();
@@ -44,7 +44,7 @@ public class Game : MonoBehaviour
         //Debug.Log("predict " + neuron.Predict(1));
         //Debug.Log("Cost " + neuron.Train(1, 0));
 
-        brain.Train(input, new float[]{ 0.5f, .5f});
+        brain.TrainTEST(input, new float[]{ 0.5f, .5f});
         brain.PrintNeurons();
         //brain.Train(input, output);
     }
@@ -64,7 +64,7 @@ public class Game : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space)) {
             Debug.Log("--------------------------");
-            brain.Train(new float[] { 0.5f, 0.5f }, new float[] { .5f, .5f });
+            brain.TrainTEST(new float[] { 0.5f, 0.5f }, new float[] { .5f, .5f });
             //var x = Random.value;
             //Debug.Log(x + " - predict " + neuron.Predict(x));
         }
@@ -73,7 +73,7 @@ public class Game : MonoBehaviour
             var x = Random.value;
             var op = x > .5f ? 1 : 0;
             var v2 = op > 0 ? 0 : 1;
-            brain.Train(new float[] { x, 1 - x }, new float[] { v2, op });
+            brain.TrainTEST(new float[] { x, 1 - x }, new float[] { v2, op });
         }
 
         if (Input.GetKey(KeyCode.W)) {
@@ -108,7 +108,7 @@ public class Game : MonoBehaviour
             var target = PosToViewPort(point.position);
             float[] input = new float[] { target.x };
             float[] output = new float[] { target.y };
-            brain.Train(input, output);
+            brain.TrainTEST(input, output);
         }
     }
 

@@ -13,11 +13,11 @@ public partial class SimpleBrain {
     // Layer, TargetNeuron, InpNeuron
     private float[][][] weights;
 
-    TrainingSet trainingSum;
+    TrainingSet trainingAvg;
 
     bool logging = false;
 
-    public SimpleBrain(int[] layers, Activation[] activations, bool log) {
+    public SimpleBrain(int[] layers, Activation[] activations, float trainingSpeed, int epocs, bool log) {
         this.layers = new int[layers.Length];
         for (int i = 0; i < layers.Length; i++) {
             this.layers[i] = layers[i];
@@ -29,7 +29,7 @@ public partial class SimpleBrain {
         InitBiases();
         InitWeights();
 
-        trainingSum = new TrainingSet(layers, .05f, 200);
+        trainingAvg = new TrainingSet(layers, trainingSpeed, epocs);
     }
 
     public void InitNeurons() {
@@ -110,5 +110,9 @@ public partial class SimpleBrain {
         }
         log += "}";
         Debug.Log(log);
+    }
+
+    public float getWeight(int layerm1, int to, int from) {
+        return weights[layerm1][to][from];
     }
 }

@@ -13,19 +13,33 @@ public class GraphPredictor : MonoBehaviour
     public LineRenderer line;
     private Camera cam;
 
+    private int xFactor = 10;
+
     SimpleBrain brain;
 
     void Start() {
+        xFactor = layers[0];
         Activation[] activations = new Activation[layers.Length];
         for (int i = 0; i < activations.Length; i++) {
-            activations[i] = i == activations.Length - 1 ? Activation.Linear : Activation.Tanh;
+            activations[i] = i == activations.Length - 1 ? Activation.Linear : Activation.Linear;
         }
-        brain = new SimpleBrain(layers, activations, false);
+        brain = new SimpleBrain(layers, activations, 0.05f, 2500, false);
 
         cam = Camera.main;
+        //float[] input = new float[xFactor];
+        //for (int j = 0; j < xFactor; j++) {
+        //    input[j] = Mathf.Pow(0, j);
+        //}
+        //brain.TrainR(input, new float[] { 0 } );
+
+        //Debug.Log(brain.getWeight(1, 0, 3));
+
+        brain.PrintWeights();
+        brain.PrintBiases();
     }
 
     // Update is called once per frame
+    int cycle = 0;
     void Update() {
         if (Input.GetMouseButtonDown(0)) {
             Transform point = Instantiate(circle).transform;
@@ -36,33 +50,60 @@ public class GraphPredictor : MonoBehaviour
         }
 
         DrawGraph();
-        Train(500);
+        cycle++;
+        Train(10);
         brain.ApplyTraining();
+        if (cycle > 10) {
+            
+            cycle = 0;
+        }
+        
 
-        Vector2 sc = new Vector2(.1f, 0);
-        sc.y = brain.Predict(new float[] { sc.x })[0];
-        Debug.Log(cam.ViewportToWorldPoint(sc));
+        //Vector2 sc = new Vector2(.1f, 0);
+        //sc.y = brain.Predict(new float[] { sc.x })[0];
+        //sc.y = Mathf.Clamp(sc.y, -1, 1);
+        //if (float.IsNaN(sc.y)) {
+        //    sc.y = -2;
+        //}
+        ////Debug.Log(cam.ViewportToWorldPoint(sc));
 
-        sc.x = 0.5f;
-        sc.y = brain.Predict(new float[] { sc.x })[0];
-        Debug.Log(cam.ViewportToWorldPoint(sc));
+        //sc.x = 0.5f;
+        //sc.y = brain.Predict(new float[] { sc.x })[0];
+        //sc.y = Mathf.Clamp(sc.y, -1, 1);
+        //if (float.IsNaN(sc.y)) {
+        //    sc.y = -2;
+        //}
+        ////Debug.Log(cam.ViewportToWorldPoint(sc));
 
-        sc.x = 0.9f;
-        sc.y = brain.Predict(new float[] { sc.x })[0];
-        Debug.Log(cam.ViewportToWorldPoint(sc));
+        //sc.x = 0.9f;
+        //sc.y = brain.Predict(new float[] { sc.x })[0];
+        //sc.y = Mathf.Clamp(sc.y, -1, 1);
+        //if(float.IsNaN(sc.y)) {
+        //    sc.y = -2;
+        //}
+        //Debug.Log(cam.ViewportToWorldPoint(sc));
         brain.PrintWeights();
         brain.PrintBiases();
     }
 
-    const int size = 10;
+    const int size = 100;
     void DrawGraph() {
         line.positionCount = size + 1;
         float x = 0;
         for (int i = 0; i <= size; i++, x += 1f / size) {
-            var prediction = brain.Predict(new float[] { x });
+
+            float[] xs = new float[xFactor];
+            for (int j = 0; j < xFactor; j++) {
+                xs[j] = Mathf.Pow(x, j);
+            }
+            var prediction = brain.Predict(xs);
             //Vector2 point = new Vector2(x, (prediction[0] + 1) * .5f);
             var y = prediction[0];
             Vector2 point = new Vector2(x, y);
+            point.y = Mathf.Clamp(point.y, -2, 2);
+            if (float.IsNaN(point.y)) {
+                point.y = -2;
+            }
             Vector2 pos = cam.ViewportToWorldPoint(point);
 
             //Debug.Log(y);
@@ -73,14 +114,19 @@ public class GraphPredictor : MonoBehaviour
 
     void Train(int size) {
         var max = points.Count;
-        if (size > max)
-            size = max;
+        if (max == 0)
+            return;
         for (int i = 0; i < size; i++) {
             int random = Random.Range(0, max);
             var target = PosToViewPort(points[random].position);
-            float[] input = new float[] { target.x };
+            var x = target.x;
+            float[] input = new float[xFactor];
+            for (int j = 0; j < xFactor; j++) {
+                input[j] = Mathf.Pow(x, j);
+            }
             float[] output = new float[] { target.y };
             brain.Train(input, output);
+            //brain.ApplyTraining();
         }
     }
 
