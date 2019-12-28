@@ -65,12 +65,12 @@ public partial class SimpleBrain {
                 for (int neuron = 0; neuron < layers[layer]; neuron++) {
                     var bias = (cbiases[layer][neuron] * trainingSpeed);
                  
-                    biases[layer][neuron] += bias * 2 / epocs;
+                    biases[layer][neuron] += bias / epocs;
                     cbiases[layer][neuron] = 0;
                     for (int neuron_am1 = 0; neuron_am1 < layers[layer - 1]; neuron_am1++) {
                         var weight = (cweights[layer - 1][neuron][neuron_am1] * trainingSpeed);
 
-                        weights[layer - 1][neuron][neuron_am1] += weight * 2 / epocs;
+                        weights[layer - 1][neuron][neuron_am1] += weight / epocs;
                         cweights[layer - 1][neuron][neuron_am1] = 0;
                     }
                 }

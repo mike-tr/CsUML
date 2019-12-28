@@ -157,23 +157,9 @@ public partial class SimpleBrain {
                 
             }
         }
-        log = log.Remove(log.Length - 2);
-        plog = plog.Remove(plog.Length - 2);
-        ilog = ilog.Remove(ilog.Length - 2);
-        dlog = dlog.Remove(dlog.Length - 2);
-        log += " ]";
-        plog += " ]";
-        dlog += " ]";
-        ilog += " ]";
-        if (logging) {
-            Debug.Log(log + " , " + plog);
-            Debug.Log(ilog + " , " + dlog);
-        }
-
 
         if(trainingAvg.Epocs()) {
             trainingAvg.Apply(biases, weights);
-            Debug.Log("Epoc Ended applying changes!");
         }
     }
 }

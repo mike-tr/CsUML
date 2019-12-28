@@ -23,7 +23,7 @@ public class GraphPredictor : MonoBehaviour
         for (int i = 0; i < activations.Length; i++) {
             activations[i] = i == activations.Length - 1 ? Activation.Linear : Activation.Linear;
         }
-        brain = new SimpleBrain(layers, activations, 0.05f, 2500, false);
+        brain = new SimpleBrain(layers, activations, 0.01f, 2500, false);
 
         cam = Camera.main;
         //float[] input = new float[xFactor];
