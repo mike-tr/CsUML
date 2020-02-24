@@ -23,7 +23,7 @@ public class GraphPredictor : MonoBehaviour
         for (int i = 0; i < activations.Length; i++) {
             activations[i] = i == activations.Length - 1 ? Activation.Linear : Activation.Linear;
         }
-        brain = new SimpleBrain(layers, activations, 0.01f, 2500, false);
+        brain = new SimpleBrain(layers, activations, 0.1f, 2500, false);
 
         cam = Camera.main;
         //float[] input = new float[xFactor];
@@ -51,7 +51,7 @@ public class GraphPredictor : MonoBehaviour
 
         DrawGraph();
         cycle++;
-        Train(10);
+        Train(1);
         brain.ApplyTraining();
         if (cycle > 10) {
             
@@ -113,21 +113,34 @@ public class GraphPredictor : MonoBehaviour
     }
 
     void Train(int size) {
-        var max = points.Count;
-        if (max == 0)
-            return;
         for (int i = 0; i < size; i++) {
-            int random = Random.Range(0, max);
-            var target = PosToViewPort(points[random].position);
-            var x = target.x;
-            float[] input = new float[xFactor];
-            for (int j = 0; j < xFactor; j++) {
-                input[j] = Mathf.Pow(x, j);
+            for (int j = 0; j < points.Count; j++) {
+                var target = PosToViewPort(points[j].position);
+                var x = target.x;
+                float[] input = new float[xFactor];
+                for (int k = 0; k < xFactor; k++) {
+                    input[k] = Mathf.Pow(x, k);
+                }
+                float[] output = new float[] { target.y };
+                brain.Train(input, output);
+                //brain.ApplyTraining();
             }
-            float[] output = new float[] { target.y };
-            brain.Train(input, output);
-            //brain.ApplyTraining();
         }
+        //var max = points.Count;
+        //if (max == 0)
+        //    return;
+        //for (int i = 0; i < size; i++) {
+        //    int random = Random.Range(0, max);
+        //    var target = PosToViewPort(points[random].position);
+        //    var x = target.x;
+        //    float[] input = new float[xFactor];
+        //    for (int j = 0; j < xFactor; j++) {
+        //        input[j] = Mathf.Pow(x, j);
+        //    }
+        //    float[] output = new float[] { target.y };
+        //    brain.Train(input, output);
+        //    //brain.ApplyTraining();
+        //}
     }
 
     public Vector2 PosToScreenRatio(Vector2 pos) {

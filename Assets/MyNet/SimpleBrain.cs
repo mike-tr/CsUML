@@ -60,6 +60,9 @@ public partial class SimpleBrain {
                 // we need to calculate d(C/B),
                 // d(C/B) = d(Z/B) * d(A/Z) * d(C/A) , d(Z/B) = 1
                 float dCA = dcost[outputLayer][outn];
+                if(outputLayer < layers.Length) {
+                    dCA /= layers[outputLayer];
+                }
                 float dAZ = NFunctions.DerivativeActivation(activations[outputLayer], zneurons[outputLayer][outn], false);
 
                 float bchange = dCA * dAZ;
