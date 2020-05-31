@@ -8,11 +8,9 @@ public partial class SimpleBrain {
     }
 
     public float[] Predict(float[] inputs) {
-        if(inputs.Length < layers[0]) {
-            Debug.LogError("Expects " + layers[0] + " inputs, got only " + inputs.Length);
+        if (inputs.Length != layers[0]) {
+            Debug.LogError("Expects " + layers[0] + " inputs, got " + inputs.Length);
             return null;
-        } else if (inputs.Length != layers[0]) {
-            Debug.Log("got to much inputs!");
         }
         neurons[0] = inputs;
         zneurons[0] = inputs;

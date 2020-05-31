@@ -15,12 +15,12 @@ public partial class SimpleBrain {
 
         private float meanError = 1;
         private float slope = 0.999f;
-        public float GetMeanError(float error) {
+        public float GetMeanError (float error) {
             meanError = meanError * slope + error * (1 - slope);
             return (error + meanError) * .5f;
         }
 
-        public TrainingSet(int[] layers, float trainingSpeed, int maxEpocs) {
+        public TrainingSet (int[] layers, float trainingSpeed, int maxEpocs) {
             epocs = 1;
             this.trainingSpeed = trainingSpeed;
             this.layers = layers;
@@ -42,29 +42,29 @@ public partial class SimpleBrain {
             }
         }
 
-        public void AddChange(int layer, int TargetNeuron, float biasChange) {
+        public void AddChange (int layer, int TargetNeuron, float biasChange) {
             cbiases[layer][TargetNeuron] += biasChange;
         }
-        public void AddChange(int layer, int targetNeuron, int weight, float weightChange) {
+        public void AddChange (int layer, int targetNeuron, int weight, float weightChange) {
             cweights[layer][targetNeuron][weight] += weightChange;
         }
 
-        public bool Epocs() {
+        public bool Epocs () {
             epocs++;
             return epocs > maxEpocs;
         }
 
-        public void Apply(float[][] biases, float[][][] weights, bool check = false) {
-            if (check && !Epocs()) {
+        public void Apply (float[][] biases, float[][][] weights, bool check = false) {
+            if (check && !Epocs ()) {
                 return;
             }
-            if(epocs == 0) {
+            if (epocs == 0) {
                 return;
             }
             for (int layer = 1; layer < layers.Length; layer++) {
                 for (int neuron = 0; neuron < layers[layer]; neuron++) {
                     var bias = (cbiases[layer][neuron] * trainingSpeed);
-                 
+
                     biases[layer][neuron] += bias / epocs;
                     cbiases[layer][neuron] = 0;
                     for (int neuron_am1 = 0; neuron_am1 < layers[layer - 1]; neuron_am1++) {
@@ -75,6 +75,7 @@ public partial class SimpleBrain {
                     }
                 }
             }
+
             epocs = 0;
         }
     }

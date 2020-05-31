@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public partial class SimpleBrain {
-
     private int[] layers;
     private Activation[] activations;
     // Layer, Neuron
     private float[][] neurons;
+
+    // the neurons before the activation function
     private float[][] zneurons;
     private float[][] biases;
     // Layer, TargetNeuron, InpNeuron
@@ -17,7 +18,25 @@ public partial class SimpleBrain {
 
     bool logging = false;
 
-    public SimpleBrain(int[] layers, Activation[] activations, float trainingSpeed, int epocs, bool log) {
+    public int cycles = 0;
+    public BrainData GetData () {
+        var data = new BrainData (layers, activations, neurons,
+            zneurons, biases, weights, trainingAvg.trainingSpeed, trainingAvg.maxEpocs, logging, cycles);
+        return data;
+    }
+
+    public SimpleBrain (BrainData data) {
+        this.layers = data.layers;
+        this.activations = data.GetActivations ();
+        this.biases = data.biases;
+        this.neurons = data.neurons;
+        this.zneurons = data.zneurons;
+        this.weights = data.weights;
+        this.cycles = data.cycles;
+        trainingAvg = new TrainingSet (data.layers, data.trainingSpeed, data.epocs);
+    }
+
+    public SimpleBrain (int[] layers, Activation[] activations, float trainingSpeed, int epocs, bool log) {
         this.layers = new int[layers.Length];
         for (int i = 0; i < layers.Length; i++) {
             this.layers[i] = layers[i];
@@ -25,14 +44,14 @@ public partial class SimpleBrain {
 
         this.logging = log;
         this.activations = activations;
-        InitNeurons();
-        InitBiases();
-        InitWeights();
+        InitNeurons ();
+        InitBiases ();
+        InitWeights ();
 
-        trainingAvg = new TrainingSet(layers, trainingSpeed, epocs);
+        trainingAvg = new TrainingSet (layers, trainingSpeed, epocs);
     }
 
-    public void InitNeurons() {
+    public void InitNeurons () {
         neurons = new float[layers.Length][];
         zneurons = new float[layers.Length][];
         for (int i = 0; i < layers.Length; i++) {
@@ -43,7 +62,7 @@ public partial class SimpleBrain {
         }
     }
 
-    public void InitBiases() {
+    public void InitBiases () {
         biases = new float[layers.Length][];
         for (int i = 0; i < layers.Length; i++) {
             float[] blayer = new float[layers[i]];
@@ -54,7 +73,7 @@ public partial class SimpleBrain {
         }
     }
 
-    public void InitWeights() {
+    public void InitWeights () {
         weights = new float[layers.Length - 1][][];
         for (int i = 0; i < layers.Length - 1; i++) {
             float[][] nlayer = new float[layers[i + 1]][];
@@ -69,7 +88,7 @@ public partial class SimpleBrain {
         }
     }
 
-    public void PrintNeurons() {
+    public void PrintNeurons () {
         string log = "[";
         foreach (float[] r in neurons) {
             log += " { ";
@@ -79,10 +98,10 @@ public partial class SimpleBrain {
             log += "}";
         }
         log += " ]";
-        Debug.Log(log);
+        Debug.Log (log);
     }
 
-    public void PrintBiases() {
+    public void PrintBiases () {
         string log = "[";
         foreach (float[] r in biases) {
             log += " { ";
@@ -92,10 +111,10 @@ public partial class SimpleBrain {
             log += "}";
         }
         log += "]";
-        Debug.Log(log);
+        Debug.Log (log);
     }
 
-    public void PrintWeights() {
+    public void PrintWeights () {
         string log = "{";
         foreach (float[][] f in weights) {
             log += "[";
@@ -109,10 +128,10 @@ public partial class SimpleBrain {
             log += "]";
         }
         log += "}";
-        Debug.Log(log);
+        Debug.Log (log);
     }
 
-    public float getWeight(int layerm1, int to, int from) {
+    public float getWeight (int layerm1, int to, int from) {
         return weights[layerm1][to][from];
     }
 }
